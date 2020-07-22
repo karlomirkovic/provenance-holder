@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:12.3
+    ports:
+        - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: always
+    environment:
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'password'
+      POSTGRES_DB: 'provenance'
+
+  web:
+    build: ./src
+    restart: on-failure
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./src:/provenanceholder
+    links:
+      - db
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
