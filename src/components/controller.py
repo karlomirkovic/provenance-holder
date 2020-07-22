@@ -1,5 +1,4 @@
-import datetime
-
+import sqlalchemy
 
 class Entry:
     def __init__(self):
@@ -17,8 +16,34 @@ class Controller:
     def retrieve(self):
         pass
 
-    def validate(self):
-        pass
+    def validate(self, message, user):
+        new_message = []
+        # A Message is a list of Entries
+        # Entries from ESB look like this (chorid, chorver, workid, workver, input, b'invokesig, output, b'execsig)
+        for entry in message:
+            # entry[5] - invoke_signature
+            # entry[7] - execute_signature
+            invoke = str(entry[0]) + str(entry[1]) + str(entry[2]) + str(entry[3]) + str(entry[4])
+            invoke = bytes(invoke, 'utf-8')
+            try:
+                user.public_key.verify(entry[5], invoke, encoding='hex')
+                print("Invoke signature of user " + user.username + " is valid")
+            except:
+                print("Could not verify invoke signature of user " + user.username)
+                print("Entry in message is ignored")
+
+            execute = str(entry[5]) + entry[6]
+            execute = bytes(execute, 'utf-8')
+
+            try:
+                user.public_key.verify(entry[7], execute, encoding='hex')
+                print("Execute signature of user " + user.username + " is valid")
+                new_message.append(entry)
+            except:
+                print("Could not verify execute signature of user " + user.username)
+                print("Entry in message is ignored")
+
+        return new_message
 
     # When the record method is called, the controller converts the data
     # into data that can be used by the providers and calls them to store it
