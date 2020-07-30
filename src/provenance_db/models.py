@@ -1,10 +1,26 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, DateTime
+from sqlalchemy import Column, Integer, String, Float, DateTime, LargeBinary
+from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+provenance_base = declarative_base()
 
 
-class ProvenanceEntry(Base):
+class Adaptation(provenance_base):
+    __tablename__ = 'adaptation'
+
+    provenance_hash = Column(String(64), primary_key=True)
+
+    name = Column(String, nullable=False)
+    type = Column(String, nullable=False)
+    identifier = Column(Integer, unique=True, nullable=False)
+    version = Column(Float, nullable=False)
+    change = Column(String, nullable=False)
+    # Signature of name, version, and change
+    signature = Column(String, unique=True, nullable=False)
+    predecessor = Column(String(64))
+
+
+class ProvenanceEntry(provenance_base):
     __tablename__ = 'provenance'
 
     # Sha256 hash of everything below.
@@ -12,26 +28,28 @@ class ProvenanceEntry(Base):
 
     choreography_instance_id = Column(Integer, nullable=False)
     choreography_version = Column(Integer, nullable=False)
+    choreography_identifier = Column(Integer, unique=True, nullable=False)
     workflow_instance_id = Column(Integer, unique=True, nullable=False)
     workflow_version = Column(Float, nullable=False)
+    workflow_identifier = Column(Integer, unique=True, nullable=False)
     input = Column(String, nullable=False)
-    # The signed choreography_instance_id, workflow_instance_id, workflow_version and input.
-    invoke_signature = Column(String, nullable=False)
+    invoke_signature = Column(LargeBinary, nullable=False)
 
     output = Column(String, nullable=False)
-    # The signed invoke_signature and output.
-    execute_signature = Column(String, nullable=False)
+    execute_signature = Column(LargeBinary, nullable=False)
 
     timestamp = Column(DateTime)
     # The Sha256 provenance hash of it's predecessor object
     predecessor = Column(String(64))
 
     def __repr__(self):
-        return "<ProvenanceEntry(provenance_hash={}, " \
+        return "<ProvenanceEntry(provenance_hash='{}', " \
                "choreography_instance_id={}, " \
                "choreography_version={}, " \
+               "choreography_identifier={}, " \
                "workflow_instance_id={}, " \
-               "workflow_version={}, " \
+               "workflow_version={}," \
+               "workflow_identifier={}," \
                "input='{}', " \
                "invoke_signature='{}', " \
                "output='{}', " \
@@ -41,8 +59,10 @@ class ProvenanceEntry(Base):
             .format(self.provenance_hash,
                     self.choreography_instance_id,
                     self.choreography_version,
+                    self.choreography_identifier,
                     self.workflow_instance_id,
                     self.workflow_version,
+                    self.workflow_identifier,
                     self.input,
                     self.invoke_signature,
                     self.output,
@@ -51,20 +71,20 @@ class ProvenanceEntry(Base):
                     self.predecessor)
 
 
-class User(Base):
-    __tablename__ = 'users'
+class User(provenance_base):
+    __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
     username = Column(String)
-    private_key = Column(String, nullable=False, unique=True)
-    public_key = Column(String, nullable=False, unique=True)
+    private_key_sk = Column(LargeBinary, nullable=False, unique=True)
+    private_key_vk = Column(LargeBinary, nullable=False, unique=True)
 
     def __repr__(self):
         return "<User(id={}, " \
                "username='{}', " \
-               "private_key='{}', " \
-               "public_key='{}')>"\
+               "private_key_sk='{}', " \
+               "private_key_vk='{}'>"\
             .format(self.id,
                     self.username,
-                    self.private_key,
-                    self.public_key)
+                    self.private_key_sk,
+                    self.private_key_vk)
