@@ -27,7 +27,7 @@ class ProvenanceEntry(provenance_base):
     provenance_hash = Column(String(64), primary_key=True)
 
     choreography_instance_id = Column(Integer, nullable=False)
-    choreography_version = Column(Integer, nullable=False)
+    choreography_version = Column(Float, nullable=False)
     choreography_identifier = Column(Integer, unique=True, nullable=False)
     workflow_instance_id = Column(Integer, unique=True, nullable=False)
     workflow_version = Column(Float, nullable=False)
@@ -44,18 +44,18 @@ class ProvenanceEntry(provenance_base):
 
     def __repr__(self):
         return "<ProvenanceEntry(provenance_hash='{}', " \
-               "choreography_instance_id={}, " \
-               "choreography_version={}, " \
-               "choreography_identifier={}, " \
-               "workflow_instance_id={}, " \
-               "workflow_version={}," \
-               "workflow_identifier={}," \
-               "input='{}', " \
-               "invoke_signature='{}', " \
-               "output='{}', " \
-               "execute_signature='{}', " \
-               "timestamp={}, " \
-               "predecessor='{}')>" \
+               " choreography_instance_id={}, " \
+               " choreography_version={}, " \
+               " choreography_identifier={}, " \
+               " workflow_instance_id={}, " \
+               " workflow_version={}," \
+               " workflow_identifier={}," \
+               " input='{}', " \
+               " invoke_signature='{}', " \
+               " output='{}', " \
+               " execute_signature='{}', " \
+               " timestamp={}, " \
+               " predecessor='{}')>" \
             .format(self.provenance_hash,
                     self.choreography_instance_id,
                     self.choreography_version,
@@ -83,7 +83,7 @@ class User(provenance_base):
         return "<User(id={}, " \
                "username='{}', " \
                "private_key_sk='{}', " \
-               "private_key_vk='{}'>"\
+               "private_key_vk='{})'>"\
             .format(self.id,
                     self.username,
                     self.private_key_sk,

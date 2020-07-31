@@ -3,12 +3,11 @@ import config
 
 
 def fill_dummy(provenance_holder, user):
-    message = []
     # Fill a message with 3 provenance entries
     # (chorid, chorver, choriden, workid, workver, workiden, input, b'invokesig, output, b'execsig)
-    message.append([0, 1.0, 10, 1, 1.15, 20, "20"])
-    message.append([1, 1.1, 11, 2, 1.16, 21, "20"])
-    message.append([0, 1.2, 12, 3, 1.17, 22, "20"])
+    message = [[0, 1.0, 10, 1, 1.15, 20, "20"],
+               [1, 1.1, 11, 2, 1.16, 21, "20"],
+               [0, 1.2, 12, 3, 1.17, 22, "20"]]
 
     for entry in message:
         invoke = str(entry[0]) + \

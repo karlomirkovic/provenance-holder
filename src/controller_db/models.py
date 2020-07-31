@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, LargeBinary
+from sqlalchemy import Column, Integer, LargeBinary, String
 controller_base = declarative_base()
 
 
@@ -26,8 +26,8 @@ class EntryUserRelationship(controller_base):
     def __repr__(self):
         return "<EntryUserRelationship(" \
                "choreography_instance_id={}," \
-               "workflow_instance_id" \
-               "user_id='{}')>"\
+               " workflow_instance_id={}," \
+               " user_id='{}')>"\
             .format(self.choreography_instance_id,
                     self.workflow_instance_id,
                     self.user_id)

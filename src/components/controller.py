@@ -24,7 +24,6 @@ class Entry:
 class Controller(ControllerMeta):
     def retrieve(self, search_id, search_type, provider, user):
         result = provider.retrieve(search_id, search_type)
-        message = []
         if search_type == 'workflow':
             temp = [result.choreography_instance_id,
                     result.choreography_version,
@@ -36,8 +35,6 @@ class Controller(ControllerMeta):
                     result.invoke_signature,
                     result.output,
                     result.execute_signature]
-            message.append(temp)
-            print(temp)
             eur = controller_session\
                 .query(EntryUserRelationship)\
                 .filter(EntryUserRelationship.workflow_instance_id == result.workflow_instance_id)\
@@ -46,7 +43,7 @@ class Controller(ControllerMeta):
                 .query(User)\
                 .filter(User.id == eur.user_id)\
                 .first()
-            new_message = self.validate(message, entry_user)
+            new_message = self.validate([temp], entry_user)
 
         return new_message
 
