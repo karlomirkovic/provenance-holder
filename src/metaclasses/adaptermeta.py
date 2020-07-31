@@ -9,4 +9,3 @@ class AdapterMeta(metaclass=ABCMeta):
     @abstractmethod
     def collect(self, message, provenance_holder, user):
         pass
-

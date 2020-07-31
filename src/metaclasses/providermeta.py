@@ -3,7 +3,7 @@ from abc import *
 
 class ProviderMeta(metaclass=ABCMeta):
     @abstractmethod
-    def retrieve(self, search_id, search_type):
+    def retrieve(self, search_id, search_type, entry_type):
         pass
 
     @abstractmethod
