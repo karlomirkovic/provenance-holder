@@ -35,7 +35,5 @@ if __name__ == '__main__':
 
     # Fill with dummy data for testing
     util.fill_dummy(provenance_holder, user_1)
-    test = config.provenance_session.query(provenance_models.Adaptation).all()
-    print(test[1])
-    #workflow = provenance_holder.adapter.retrieve(1, 'workflow', provenance_holder, user_2)
+
 
