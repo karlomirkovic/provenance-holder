@@ -7,4 +7,3 @@ class Adapter(AdapterMeta):
 
     def collect(self, message, provenance_holder, user):
         provenance_holder.controller.record(message, provenance_holder.providers[0], user)
-

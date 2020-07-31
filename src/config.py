@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from provenance_db.models import provenance_base
+
 from controller_db.models import controller_base
+from provenance_db.models import provenance_base
 
 
 def migrate_database():
@@ -15,6 +16,3 @@ provenance_engine = create_engine('postgres+psycopg2://postgres:password@localho
 provenance_session = sessionmaker(bind=provenance_engine)()
 controller_engine = create_engine('postgres+psycopg2://postgres:password@localhost:5432/controller')
 controller_session = sessionmaker(bind=controller_engine)()
-
-
-

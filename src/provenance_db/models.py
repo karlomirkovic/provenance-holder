@@ -1,6 +1,5 @@
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Float, DateTime, LargeBinary
-from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
 
 provenance_base = declarative_base()
 
@@ -16,12 +15,31 @@ class Adaptation(provenance_base):
     version = Column(Float, nullable=False)
     change = Column(String, nullable=False)
     # Signature of name, version, and change
-    signature = Column(String, unique=True, nullable=False)
+    signature = Column(LargeBinary, unique=True, nullable=False)
+    timestamp = Column(DateTime)
     predecessor = Column(String(64))
 
+    def __repr__(self):
+        return "<Adaptation(provenance_hash='{}', " \
+               " name='{}', " \
+               " type={}, " \
+               " identifier={}, " \
+               " version={}, " \
+               " change={}," \
+               " signature='{}'," \
+               " predecessor='{}')>" \
+            .format(self.provenance_hash,
+                    self.name,
+                    self.type,
+                    self.identifier,
+                    self.version,
+                    self.change,
+                    self.signature,
+                    self.predecessor)
 
-class ProvenanceEntry(provenance_base):
-    __tablename__ = 'provenance'
+
+class Execution(provenance_base):
+    __tablename__ = 'execution'
 
     # Sha256 hash of everything below.
     provenance_hash = Column(String(64), primary_key=True)
@@ -43,7 +61,7 @@ class ProvenanceEntry(provenance_base):
     predecessor = Column(String(64))
 
     def __repr__(self):
-        return "<ProvenanceEntry(provenance_hash='{}', " \
+        return "<Execution(provenance_hash='{}', " \
                " choreography_instance_id={}, " \
                " choreography_version={}, " \
                " choreography_identifier={}, " \
@@ -83,7 +101,7 @@ class User(provenance_base):
         return "<User(id={}, " \
                "username='{}', " \
                "private_key_sk='{}', " \
-               "private_key_vk='{})'>"\
+               "private_key_vk='{})'>" \
             .format(self.id,
                     self.username,
                     self.private_key_sk,
