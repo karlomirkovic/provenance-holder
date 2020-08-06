@@ -13,8 +13,10 @@ def fill_dummy(provenance_holder, user):
                ['mod_2', 'sub', 2, 1.2, '-20', 'adaptation']]
 
     for entry in message:
+        # The last piece of data is the entry type
         entry_type = entry[len(entry) - 1]
         if entry_type == 'execution':
+            # Concatenate the data in order to create the invoke signature
             invoke = str(entry[0]) + \
                      str(entry[1]) + \
                      str(entry[2]) + \
@@ -23,18 +25,24 @@ def fill_dummy(provenance_holder, user):
                      str(entry[5]) + \
                      entry[6]
             invoke = bytes(invoke, 'utf-8')
+
             # Reconstruct the private key using the ed25519 constructor
             private_key = SigningKey(user.private_key_sk)
+
+            # Sign the data and store it in the entry as a replacement to
+            # the entry type as it is needed only at the end of the list
             invoke_signature = private_key.sign(invoke, encoding='hex')
             entry[7] = invoke_signature
+            # Append more dummy data, concatenate, and sign to create the execute signature
             entry.append("20")
             execute = str(invoke_signature) + entry[8]
             execute = bytes(execute, 'utf-8')
             execute_signature = private_key.sign(execute, encoding='hex')
             entry.append(execute_signature)
+            # Append the entry type at the end of the list once again as it was previously replaced
             entry.append(entry_type)
         elif entry_type == 'adaptation':
-            # (name, type, identifier, version, change, signature, entry_type)
+            # Concatenate the necessary data for signing
             sig_msg = entry[0] + str(entry[3]) + entry[4]
             sig_msg = bytes(sig_msg, 'utf-8')
             # Reconstruct the private key using the ed 25519 constructor
@@ -43,4 +51,4 @@ def fill_dummy(provenance_holder, user):
             entry[5] = signature
             entry.append(entry_type)
 
-    provenance_holder.controller.record(message, provenance_holder.providers[0], user)
+    provenance_holder.controller.record(message, provenance_holder.providers, user)

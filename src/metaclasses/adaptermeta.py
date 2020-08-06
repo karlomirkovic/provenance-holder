@@ -3,7 +3,7 @@ from abc import *
 
 class AdapterMeta(metaclass=ABCMeta):
     @abstractmethod
-    def retrieve(self, search_id, search_type, provenance_holder, user):
+    def retrieve(self, entry, provenance_holder, user, entry_type):
         pass
 
     @abstractmethod

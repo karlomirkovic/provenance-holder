@@ -6,7 +6,7 @@ provenance_base = declarative_base()
 
 class Adaptation(provenance_base):
     __tablename__ = 'adaptation'
-
+    # The Sha256 hash of everything below apart from the predecessor
     provenance_hash = Column(String(64), primary_key=True)
 
     name = Column(String, nullable=False)
@@ -17,6 +17,8 @@ class Adaptation(provenance_base):
     # Signature of name, version, and change
     signature = Column(LargeBinary, unique=True, nullable=False)
     timestamp = Column(DateTime)
+
+    # The Sha256 provenance hash of it's predecessor object
     predecessor = Column(String(64))
 
     def __repr__(self):
@@ -27,6 +29,7 @@ class Adaptation(provenance_base):
                " version={}, " \
                " change={}," \
                " signature='{}'," \
+               " timestamp={}," \
                " predecessor='{}')>" \
             .format(self.provenance_hash,
                     self.name,
@@ -35,13 +38,14 @@ class Adaptation(provenance_base):
                     self.version,
                     self.change,
                     self.signature,
+                    self.timestamp,
                     self.predecessor)
 
 
 class Execution(provenance_base):
     __tablename__ = 'execution'
 
-    # Sha256 hash of everything below.
+    # Sha256 hash of everything below apart from the predecessor
     provenance_hash = Column(String(64), primary_key=True)
 
     choreography_instance_id = Column(Integer, nullable=False)
@@ -57,6 +61,7 @@ class Execution(provenance_base):
     execute_signature = Column(LargeBinary, nullable=False)
 
     timestamp = Column(DateTime)
+
     # The Sha256 provenance hash of it's predecessor object
     predecessor = Column(String(64))
 
@@ -94,6 +99,7 @@ class User(provenance_base):
 
     id = Column(Integer, primary_key=True)
     username = Column(String)
+    # The signing and verifying key that make up the ed25519 SigningKey object
     private_key_sk = Column(LargeBinary, nullable=False, unique=True)
     private_key_vk = Column(LargeBinary, nullable=False, unique=True)
 

@@ -4,6 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 controller_base = declarative_base()
 
 
+# An ExecutionUserRelationship stored in the controller database
+# in order to be able to identify the user of an execution entry prior to validation
 class ExecutionUserRelationship(controller_base):
     __tablename__ = 'executionuserrelationship'
 
@@ -21,6 +23,8 @@ class ExecutionUserRelationship(controller_base):
                     self.user_id)
 
 
+# An ExecutionUserRelationship stored in the controller database
+# in order to be able to identify the user of an adaptation entry prior to validation
 class AdaptationUserRelationship(controller_base):
     __tablename__ = 'adaptationuserrelationship'
 
