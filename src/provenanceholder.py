@@ -3,8 +3,8 @@ import ed25519
 import config
 import src.provenance_db.models as provenance_models
 import util
-from provenance_db.models import Adaptation
 from src.components import adapter as a, provider as p, controller as c
+from provenance_db.models import Execution, Adaptation
 
 
 class ProvenanceHolder:
@@ -36,12 +36,35 @@ if __name__ == '__main__':
 
     # Fill with dummy data for testing
     util.fill_dummy(provenance_holder, user_1)
-    search_entry = Adaptation(provenance_hash=None,
-                              name=None,
-                              type=None,
-                              identifier=0,
-                              version=None,
-                              change=None,
-                              signature=None,
-                              timestamp=None,
-                              predecessor=None)
+    search_entry_1 = Execution(provenance_hash=None,
+                               choreography_instance_id=0,
+                               choreography_version=None,
+                               choreography_identifier=None,
+                               workflow_instance_id=None,
+                               workflow_version=None,
+                               workflow_identifier=None,
+                               input=None,
+                               invoke_signature=None,
+                               output=None,
+                               execute_signature=None,
+                               timestamp=None,
+                               predecessor=None)
+
+    search_entry_2 = Adaptation(provenance_hash=None,
+                                name=None,
+                                type='add',
+                                identifier=None,
+                                version=None,
+                                change=None,
+                                signature=None,
+                                timestamp=None,
+                                predecessor=None)
+
+    adaptations = provenance_holder.providers[0].retrieve('adaptation')
+    results = provenance_holder.controller.retrieve(search_entry_2, provenance_holder.providers, 'adaptation')
+
+    for p in adaptations:
+        print(p)
+    # for r in results:
+    #     for k in r:
+    #         print(k)

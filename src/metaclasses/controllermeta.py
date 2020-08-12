@@ -3,7 +3,7 @@ from abc import *
 
 class ControllerMeta(metaclass=ABCMeta):
     @abstractmethod
-    def retrieve(self, entry, provider, user, entry_type):
+    def retrieve(self, entry, provider, entry_type):
         pass
 
     @abstractmethod

@@ -2,15 +2,17 @@ from ed25519 import SigningKey
 
 
 def fill_dummy(provenance_holder, user):
-    # Fill a message with 5 entries
+    # Fill a message with 8 entries
     # Execution (cid, cver, cide, wid, wver, wid, input, b'invokesig', output, b'execsig', entry_type)
     # Adaptation (name, type, identifier, version, change, b'signature', entry_type)
     message = [[0, 1.0, 10, 1, 1.15, 20, "20", 'execution'],
                [1, 1.1, 11, 2, 1.16, 21, "20", 'execution'],
                [0, 1.2, 12, 3, 1.17, 22, "20", 'execution'],
+               [0, 1.3, 13, 4, 1.18, 23, "30", 'execution'],
                ['mod_0', 'add', 0, 1.0, '+20', 'adaptation'],
                ['mod_1', 'add', 1, 1.1, '+30', 'adaptation'],
-               ['mod_2', 'sub', 2, 1.2, '-20', 'adaptation']]
+               ['mod_2', 'sub', 2, 1.2, '-20', 'adaptation'],
+               ['mod_3', 'sub', 3, 1.3, '+30', 'adaptation']]
 
     for entry in message:
         # The last piece of data is the entry type
