@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, LargeBinary
+from sqlalchemy import Column, Integer, Float, DateTime, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.types import String
 
 provenance_base = declarative_base()
 
@@ -92,23 +93,3 @@ class Execution(provenance_base):
                     self.execute_signature,
                     self.timestamp,
                     self.predecessor)
-
-
-class User(provenance_base):
-    __tablename__ = 'user'
-
-    id = Column(Integer, primary_key=True)
-    username = Column(String)
-    # The signing and verifying key that make up the ed25519 SigningKey object
-    private_key_sk = Column(LargeBinary, nullable=False, unique=True)
-    private_key_vk = Column(LargeBinary, nullable=False, unique=True)
-
-    def __repr__(self):
-        return "<User(id={}, " \
-               "username='{}', " \
-               "private_key_sk='{}', " \
-               "private_key_vk='{})'>" \
-            .format(self.id,
-                    self.username,
-                    self.private_key_sk,
-                    self.private_key_vk)

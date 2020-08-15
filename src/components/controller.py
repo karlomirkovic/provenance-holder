@@ -1,17 +1,16 @@
 import hashlib
 
-from ed25519 import VerifyingKey
+import ed25519
 
 from config import controller_session, provenance_session
 from controller_db.models import ExecutionUserRelationship, AdaptationUserRelationship
 from metaclasses.controllermeta import ControllerMeta
-from provenance_db.models import User
+from controller_db.models import User
 
 
-# The Execution and Adaptation classes are only used within the controller for the purpose of converting
-# the data from the message into a format that can be used by the providers
-
-
+# The Execution and Adaptation classes are only used within the controller for two purposes
+# Converting the data from the message into a format that can be used by the providers
+# Comparing the retrieval results from each provider
 class Execution:
     def __init__(self):
         self.provenance_hash = None
@@ -29,6 +28,25 @@ class Execution:
         self.predecessor = None
         self.entry_type = None
 
+    # Overload the equality operator in order to compare executions
+    def __eq__(self, other):
+        if not isinstance(other, Execution):
+            # Don't attempt to compare against unrelated types
+            return NotImplemented
+
+        return self.provenance_hash == other.provenance_hash and \
+               self.choreography_instance_id == other.choreography_instance_id and \
+               self.choreography_version == other.choreography_version and \
+               self.choreography_identifier == other.choreography_identifier and \
+               self.workflow_instance_id == other.workflow_instance_id and \
+               self.workflow_version == other.workflow_version and \
+               self.input == other.input and \
+               self.invoke_signature == other.invoke_signature and \
+               self.output == other.output and \
+               self.execute_signature == other.execute_signature and \
+               self.timestamp == other.timestamp and \
+               self.predecessor == other.predecessor
+
 
 class Adaptation:
     def __init__(self):
@@ -43,13 +61,117 @@ class Adaptation:
         self.predecessor = None
         self.entry_type = None
 
+    # Overload the equality operator in order to compare adaptations
+    def __eq__(self, other):
+        if not isinstance(other, Adaptation):
+            # Don't attempt to compare against unrelated types
+            return NotImplemented
+
+        return self.provenance_hash == other.provenance_hash and \
+               self.name == other.name and \
+               self.type == other.type and \
+               self.identifier == other.identifier and \
+               self.version == other.version and \
+               self.change == other.change and \
+               self.signature == other.signature and \
+               self.timestamp == other.timestamp and \
+               self.predecessor == other.predecessor
+
+
+def compare_results(message, entry_type):
+    # In the case that there is only one provider, there is no need for comparison
+    if len(message) == 1:
+        return 1
+
+    # The message is a list of lists
+    # It consists of data retrieval from the different providers
+    # Iterate through the matrix column-wise and compare entries
+    if entry_type == 'execution':
+        for i in range(len(message)):
+            entry_1 = Execution()
+            entry_1.provenance_hash = message[i][0]
+            entry_1.choreography_instance_id = message[i][1]
+            entry_1.choreography_version = message[i][2]
+            entry_1.choreography_identifier = message[i][3]
+            entry_1.workflow_instance_id = message[i][4]
+            entry_1.workflow_version = message[i][5]
+            entry_1.workflow_identifier = message[i][6]
+            entry_1.input = message[i][7]
+            entry_1.invoke_signature = message[i][8]
+            entry_1.output = message[i][9]
+            entry_1.execute_signature = message[i][10]
+            entry_1.timestamp = message[i][11]
+            entry_1.predecessor = message[i][12]
+            for j in range(len(message[i])):
+                compare_entry = Execution()
+                compare_entry.provenance_hash = message[j][0]
+                compare_entry.choreography_instance_id = message[j][1]
+                compare_entry.choreography_version = message[j][2]
+                compare_entry.choreography_identifier = message[j][3]
+                compare_entry.workflow_instance_id = message[j][4]
+                compare_entry.workflow_version = message[j][5]
+                compare_entry.workflow_identifier = message[j][6]
+                compare_entry.input = message[j][7]
+                compare_entry.invoke_signature = message[j][8]
+                compare_entry.output = message[j][9]
+                compare_entry.execute_signature = message[j][10]
+                compare_entry.timestamp = message[j][11]
+                compare_entry.predecessor = message[j][12]
+                if entry_1 == compare_entry:
+                    pass
+                else:
+                    print("Execution with provenance hash "
+                          + str(compare_entry.provenance_hash)
+                          + " from provider "
+                          + str(i)
+                          + " differs to the respective execution from provider 1.")
+                    return 0
+    elif entry_type == 'adaptation':
+        for i in range(len(message)):
+            entry_1 = Adaptation()
+            entry_1.provenance_hash = message[0][i].provenance_hash
+            entry_1.name = message[0][i].name
+            entry_1.type = message[0][i].type
+            entry_1.identifier = message[0][i].identifier
+            entry_1.version = message[0][i].version
+            entry_1.change = message[0][i].change
+            entry_1.signature = message[0][i].signature
+            entry_1.timestamp = message[0][i].timestamp
+            entry_1.predecessor = message[0][i].predecessor
+            for j in range(len(message[0])):
+                print(message[j][i])
+                compare_entry = Adaptation()
+                compare_entry.provenance_hash = message[j][i].provenance_hash
+                compare_entry.name = message[j][i].name
+                compare_entry.type = message[j][i].type
+                compare_entry.identifier = message[j][i].identifier
+                compare_entry.version = message[j][i].version
+                compare_entry.change = message[j][i].change
+                compare_entry.signature = message[j][i].signature
+                compare_entry.timestamp = message[j][i].timestamp
+                compare_entry.predecessor = message[j][i].predecessor
+                if entry_1 == compare_entry:
+                    pass
+                else:
+                    print("Adaptation with provenance hash "
+                          + str(compare_entry.provenance_hash)
+                          + " from provider "
+                          + str(i)
+                          + " differs to the respective adaptation from provider 1.")
+                    return 0
+    else:
+        print("The controller can not compare data of the entry type '" + entry_type + "'.")
+    return 1
+
 
 class Controller(ControllerMeta):
     # The retrieve method of the controller takes an entry for querying as a parameter
     # Together with the providers and entry type
     def retrieve(self, entry, providers, entry_type):
+        # retrieve_results is the list of all provider entry lists
         retrieve_results = []
         for provider in providers:
+            # The list of entries from each individual provider is stored in provider_results
             provider_results = []
             results = provider.retrieve(entry_type, entry)
             # If the entry type is an execution
@@ -57,8 +179,6 @@ class Controller(ControllerMeta):
             if entry_type == 'execution':
                 # The retrieval of database entries is done by passing an entry with all attributes set to None
                 # The only attribute that isn't None is the attribute that the user wants to query by
-                # For executions, there are two options,
-                # namely the workflow instance id and the choreography instance id
                 for result in results:
                     temp = [result.choreography_instance_id,
                             result.choreography_version,
@@ -79,16 +199,19 @@ class Controller(ControllerMeta):
                         .first()
                     # Once we have the execution user relationship we query the database of users
                     # in order to find the user that signed the data when it was being recorded
-                    entry_user = provenance_session \
+                    entry_user = controller_session \
                         .query(User) \
                         .filter(User.id == eur.user_id) \
                         .first()
                     # The message is validated
                     new_message = self.validate([temp], entry_user)
-
                     if new_message:
                         new_message = result
+                    else:
+                        new_message = []
+                        print("The message could not be fully validate. Returning empty list.")
                     provider_results.append(new_message)
+                retrieve_results.append(provider_results)
             elif entry_type == 'adaptation':
                 for result in results:
                     # Convert the query result into a data format that can be validated.
@@ -107,20 +230,26 @@ class Controller(ControllerMeta):
                         .first()
                     # Once we have the adaptation user relationship we query the database of users
                     # in order to find the user that signed the data when it was being recorded
-                    entry_user = provenance_session \
+                    entry_user = controller_session \
                         .query(User) \
                         .filter(User.id == aur.user_id) \
                         .first()
                     # Validate the entry
                     new_message = self.validate([temp], entry_user)
-
                     # If the adaptation is validated, return it.
                     if new_message:
                         new_message = result
+                    else:
+                        new_message = []
+                        print("The message could not be fully validate. Empty list returned.")
                     provider_results.append(new_message)
-
-            retrieve_results.append(provider_results)
-        return retrieve_results
+                retrieve_results.append(provider_results)
+        if compare_results(retrieve_results, entry_type):
+            print("The retrieve results match upon comparison.")
+        else:
+            print("The retrieve results do not match upon comparison. Empty list returned.")
+            return []
+        return retrieve_results[0]
 
     # The validate method of the controller takes a message and a user as parameters
     # Since the message is a list of entries, the method iterates over the entries and validates the signatures
@@ -135,7 +264,6 @@ class Controller(ControllerMeta):
             if entry_type == 'execution':
                 # The piece of data at entry[7] is the invoke_signature
                 # The piece of data at entry[9] is the execute_signature
-                # Concatenate the data in order to recreate the original data that was signed
                 invoke = str(entry[0]) + \
                          str(entry[1]) + \
                          str(entry[2]) + \
@@ -148,12 +276,12 @@ class Controller(ControllerMeta):
                 execute = bytes(execute, 'utf-8')
 
                 # Reconstruct the public key using the ed25519 constructor and validate
-                public_key = VerifyingKey(user.private_key_vk)
+                public_key = ed25519.VerifyingKey(ed25519.from_ascii(user.public_key, encoding='hex'))
                 try:
                     public_key.verify(entry[7], invoke, encoding='hex')
                     public_key.verify(entry[9], execute, encoding='hex')
                     new_message.append(entry)
-                    print("Validated")
+                    print("Validated signature of execution with workflow_id: " + str(entry[3]))
                 except:
                     print("Could not validate signature of user " + user.username)
             # If the entry is an adaptation validate accordingly
@@ -164,16 +292,15 @@ class Controller(ControllerMeta):
                 sig_msg = bytes(sig_msg, 'utf-8')
 
                 # Reconstruct the public key using the ed25519 constructor and validate
-                public_key = VerifyingKey(user.private_key_vk)
+                public_key = ed25519.VerifyingKey(ed25519.from_ascii(user.public_key, encoding='hex'))
                 try:
                     public_key.verify(entry[5], sig_msg, encoding='hex')
                     new_message.append(entry)
-                    print("Validated")
+                    print("Validated signature of adaptation with identifier: " + str(entry[2]))
                 except:
                     print("Could not validate signature of user " + user.username)
             else:
-                print("Cannot validate an entry of this type.")
-
+                print("Cannot validate an entry of the type: " + entry_type)
         return new_message
 
     # When the record method is called, the controller converts the data

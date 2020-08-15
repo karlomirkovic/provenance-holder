@@ -43,6 +43,7 @@ class Provider(ProviderMeta):
                     s_value = getattr(entry, str(query_column_key))
                     if a_value != s_value:
                         results.remove(r)
+
         else:
             # The overloaded retrieve method has two trivial options
             # Querying all execution entries or querying all adaptation entries

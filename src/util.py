@@ -1,4 +1,4 @@
-from ed25519 import SigningKey
+import ed25519
 
 
 def fill_dummy(provenance_holder, user):
@@ -29,7 +29,7 @@ def fill_dummy(provenance_holder, user):
             invoke = bytes(invoke, 'utf-8')
 
             # Reconstruct the private key using the ed25519 constructor
-            private_key = SigningKey(user.private_key_sk)
+            private_key = ed25519.SigningKey(ed25519.from_ascii(user.private_key, encoding='hex'))
 
             # Sign the data and store it in the entry as a replacement to
             # the entry type as it is needed only at the end of the list
@@ -48,7 +48,7 @@ def fill_dummy(provenance_holder, user):
             sig_msg = entry[0] + str(entry[3]) + entry[4]
             sig_msg = bytes(sig_msg, 'utf-8')
             # Reconstruct the private key using the ed 25519 constructor
-            private_key = SigningKey(user.private_key_sk)
+            private_key = ed25519.SigningKey(ed25519.from_ascii(user.private_key, encoding='hex'))
             signature = private_key.sign(sig_msg, encoding='hex')
             entry[5] = signature
             entry.append(entry_type)

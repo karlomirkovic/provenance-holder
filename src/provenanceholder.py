@@ -1,7 +1,7 @@
 import ed25519
 
 import config
-import src.provenance_db.models as provenance_models
+import src.controller_db.models as controller_models
 import util
 from src.components import adapter as a, provider as p, controller as c
 from provenance_db.models import Execution, Adaptation
@@ -21,18 +21,19 @@ if __name__ == '__main__':
     provenance_holder = ProvenanceHolder()
     provenance_holder.providers.append(p.Provider(config.provenance_session))
     private_key_1, public_key_1 = ed25519.create_keypair()
-    user_1 = provenance_models.User(id=0,
+    user_1 = controller_models.User(id=0,
                                     username='ludwig_stage',
-                                    private_key_sk=private_key_1.sk_s,
-                                    private_key_vk=private_key_1.vk_s)
+                                    public_key=public_key_1.to_ascii(encoding='hex'),
+                                    private_key=private_key_1.to_ascii(encoding='hex'))
+
     private_key_2, public_key_2 = ed25519.create_keypair()
-    user_2 = provenance_models.User(id=1,
+    user_2 = controller_models.User(id=1,
                                     username='karlo_mirkovic',
-                                    private_key_sk=private_key_2.sk_s,
-                                    private_key_vk=private_key_2.vk_s)
-    config.provenance_session.add(user_1)
-    config.provenance_session.add(user_2)
-    config.provenance_session.commit()
+                                    public_key=public_key_2.to_ascii(encoding='hex'),
+                                    private_key=private_key_2.to_ascii(encoding='hex'))
+    config.controller_session.add(user_1)
+    config.controller_session.add(user_2)
+    config.controller_session.commit()
 
     # Fill with dummy data for testing
     util.fill_dummy(provenance_holder, user_1)
@@ -61,10 +62,7 @@ if __name__ == '__main__':
                                 predecessor=None)
 
     adaptations = provenance_holder.providers[0].retrieve('adaptation')
-    results = provenance_holder.controller.retrieve(search_entry_2, provenance_holder.providers, 'adaptation')
+    results = provenance_holder.controller.retrieve(search_entry_1, provenance_holder.providers, 'execution')
 
-    for p in adaptations:
-        print(p)
-    # for r in results:
-    #     for k in r:
-    #         print(k)
+
+

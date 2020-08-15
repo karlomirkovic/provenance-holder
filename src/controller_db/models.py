@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, String, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 
 controller_base = declarative_base()
@@ -37,3 +37,22 @@ class AdaptationUserRelationship(controller_base):
                " user_id='{}')>" \
             .format(self.identifier,
                     self.user_id)
+
+
+class User(controller_base):
+    __tablename__ = 'user'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String)
+    public_key = Column(LargeBinary, nullable=False, unique=True)
+    private_key = Column(LargeBinary, nullable=False, unique=True)
+
+    def __repr__(self):
+        return "<User(id={}, " \
+               "username='{}', " \
+               "public_key='{}', " \
+               "private_key='{})'>" \
+            .format(self.id,
+                    self.username,
+                    self.public_key,
+                    self.private_key)
