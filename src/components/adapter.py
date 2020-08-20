@@ -2,7 +2,7 @@ from metaclasses.adaptermeta import AdapterMeta
 
 
 class Adapter(AdapterMeta):
-    def retrieve(self, entry, provenance_holder, user, entry_type):
+    def retrieve(self, entry, provenance_holder, entry_type):
         result = provenance_holder.controller.retrieve(entry, provenance_holder.providers, entry_type)
         return result
 

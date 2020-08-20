@@ -37,12 +37,16 @@ class Provider(ProviderMeta):
                         if e not in results:
                             results.append(e)
 
-            for r in results:
+            wrong_results = []
+            for i in range(len(results)):
                 for query_column_key in query_column_keys:
-                    a_value = getattr(r, str(query_column_key))
+                    a_value = getattr(results[i], str(query_column_key))
                     s_value = getattr(entry, str(query_column_key))
                     if a_value != s_value:
-                        results.remove(r)
+                        wrong_results.append(results[i])
+
+            for i in range(len(wrong_results)):
+                results.remove(wrong_results[i])
 
         else:
             # The overloaded retrieve method has two trivial options

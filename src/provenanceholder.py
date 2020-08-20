@@ -37,32 +37,41 @@ if __name__ == '__main__':
 
     # Fill with dummy data for testing
     util.fill_dummy(provenance_holder, user_1)
-    search_entry_1 = Execution(provenance_hash=None,
-                               choreography_instance_id=0,
-                               choreography_version=None,
-                               choreography_identifier=None,
-                               workflow_instance_id=None,
-                               workflow_version=None,
-                               workflow_identifier=None,
-                               input=None,
-                               invoke_signature=None,
-                               output=None,
-                               execute_signature=None,
+    query_entry_1 = Execution(provenance_hash=None,
+                              choreography_instance_id=0,
+                              choreography_version=1.3,
+                              choreography_identifier=None,
+                              workflow_instance_id=None,
+                              workflow_version=None,
+                              workflow_identifier=None,
+                              input=None,
+                              invoke_signature=None,
+                              output=None,
+                              execute_signature=None,
+                              timestamp=None,
+                              predecessor=None)
+
+    query_entry_2 = Adaptation(provenance_hash=None,
+                               name=None,
+                               type='add',
+                               identifier=None,
+                               version=1.0,
+                               change=None,
+                               signature=None,
                                timestamp=None,
                                predecessor=None)
 
-    search_entry_2 = Adaptation(provenance_hash=None,
-                                name=None,
-                                type='add',
-                                identifier=None,
-                                version=None,
-                                change=None,
-                                signature=None,
-                                timestamp=None,
-                                predecessor=None)
 
-    adaptations = provenance_holder.providers[0].retrieve('adaptation')
-    results = provenance_holder.controller.retrieve(search_entry_1, provenance_holder.providers, 'execution')
+    # Demo of retrieve operation
+    retrieve_results_1 = provenance_holder.adapter.retrieve(query_entry_1, provenance_holder, 'execution')
+    # retrieve_results_2 = provenance_holder.adapter.retrieve(query_entry_2, provenance_holder, 'adaptation')
+    #
+    for r in retrieve_results_1:
+        print(r)
+
+    # entries = provenance_holder.providers[0].retrieve('adaptation')
+    # for a in adaptations:
+    #     print(a)
 
 
 
