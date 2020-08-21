@@ -236,7 +236,7 @@ class Controller(ControllerMeta):
                         .first()
                     # Validate the entry
                     new_message = self.validate([temp], entry_user)
-                    # If the adaptation is validated, return it.
+                    # If the adaptation is validated, return it
                     if new_message:
                         new_message = result
                     else:
@@ -307,7 +307,9 @@ class Controller(ControllerMeta):
     # into data that can be used by the providers and calls them to store it
     # The record method also calculates the provenance hash and the predecessor object for each entry
     # It does it once per entry so each provider doesn't have to do it repeatedly
-    def record(self, message, providers, user):
+    def record(self, message, providers, user_id):
+        # Identify the user
+        user = controller_session.query(User).filter(User.id == user_id).first()
         # Validate the entries in the message before proceeding to record
         message = self.validate(message, user)
         new_message = []
@@ -425,6 +427,7 @@ class Controller(ControllerMeta):
                 temp.identifier = new_entry.identifier
                 db_entries = providers[0].retrieve('adaptation', temp)
                 for db_entry in db_entries:
+                    # If the entry is not the first adaptation in the database then it has a predecessor
                     if adaptations.count() > 1:
                         db_entry.predecessor = adaptations[1].provenance_hash
                     provenance_session.commit()

@@ -53,4 +53,4 @@ def fill_dummy(provenance_holder, user):
             entry[5] = signature
             entry.append(entry_type)
 
-    provenance_holder.adapter.collect(message, provenance_holder, user)
+    provenance_holder.adapter.collect(message, provenance_holder, user.id)

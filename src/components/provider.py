@@ -1,8 +1,8 @@
 import datetime
 
 from metaclasses.providermeta import ProviderMeta
-from ..config import provenance_session
-from ..provenance_db.models import Execution, Adaptation
+from config import provenance_session
+from provenance_db.models import Execution, Adaptation
 
 
 class Provider(ProviderMeta):
@@ -29,6 +29,12 @@ class Provider(ProviderMeta):
                 print("The provenance holder doesn't support that entry type.")
                 return []
 
+            # If all query attributes are None, return all entries of the type
+            if len(query_column_keys) == 0:
+                return entries
+
+            # Loop through all entries and query attributes that are not None
+            # If the query attribute matches a database attribute add it to the results
             for e in entries:
                 for query_column_key in query_column_keys:
                     a_value = getattr(e, str(query_column_key))
@@ -38,6 +44,7 @@ class Provider(ProviderMeta):
                             results.append(e)
 
             wrong_results = []
+            # Memorise the results that don't match both attributes
             for i in range(len(results)):
                 for query_column_key in query_column_keys:
                     a_value = getattr(results[i], str(query_column_key))
@@ -45,6 +52,7 @@ class Provider(ProviderMeta):
                     if a_value != s_value:
                         wrong_results.append(results[i])
 
+            # Remove the wrong results from the results list
             for i in range(len(wrong_results)):
                 results.remove(wrong_results[i])
 
